@@ -380,6 +380,10 @@ while True:
         king.move_left(display.get_board())
     if ch=='d':
         king.move_right(display.get_board())
+    if ch=='l':
+        king.areal_damage(display.get_board(),cannon_list,hut_list,th)
+    if ch==' ':
+        king.deal_damage(display.get_board(),cannon_list,hut_list,th)
     time.sleep(2)
     display.print_board()
 
