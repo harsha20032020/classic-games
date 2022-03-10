@@ -368,8 +368,92 @@ class King:
             if(th.get_strength()==0):
                 th.destroy_th(grid)
             
+class Barbarians:
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
+        self.width=1
+        self.height=1
+        self.strength=4 #kbarbarians takes 4 hits to get killed
+        self.damage=1   #barbarian king deals 1 damage
+        
+    def get_x(self):
+        return self.x
+    def get_y(self):
+        return self.y
+    def set_x(self,x):
+        self.x=x
+    def set_y(self,y):
+        self.y=y
+    def get_strength(self):
+        if self.strength<=0:
+            return 0
+        else:
+            return self.strength
+    def render_barbarians(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                x=self.x
+                y=self.y
+                ratio = self.strength/4
+                if ratio> 0.5:
+                    grid[i][j]=Fore.GREEN+"B"+Style.RESET_ALL
+                elif ratio> 0.25:
+                    grid[i][j]=Fore.YELLOW+"B"+Style.RESET_ALL
+                else:
+                    grid[i][j]=Fore.RED+"B"+Style.RESET_ALL
+        return grid
+    def delete_barbarians(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                grid[i][j]=" "
+        del self
+    def clear_barbarians(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                grid[i][j]=" "
+    def damage_taken(self):
+        self.strength-=1
+    # def move_up(self,grid):
+    #     x=self.x
+    #     self.clear_barbarians(grid)
+    #     self.x=x-1
+    #     self.render_barbarians(grid)
+        
+    # def move_down(self,grid):
+    #     x=self.x
+    #     self.clear_barbarians(grid)
+    #     self.x=x+1
+    #     self.render_barbarians(grid)
+        
+    # def move_left(self,grid):
+    #     y=self.y
+    #     self.clear_barbarians(grid)
+    #     self.y=y-1
+    #     self.render_barbarians(grid)
+        
+    # def move_right(self,grid):
+    #     y=self.y
+    #     self.clear_king(grid)
+    #     self.y=y+1
+    #     self.render_king(grid)
+    def move_to(self,x,y,grid):
+        self.clear_barbarians(grid)
+        self.y=y
+        self.x=x
+        self.render_barbarians(grid)
+        
+    # def deal_damage(self,grid,list1,list2,th):
+    # todo
+        
 
-display = Board(30,30) #width=120, height=30
+display = Board(30,30) #width=30, height=30
 display.get_board()
 #display.print_board()
 
@@ -391,6 +475,10 @@ th.render_th(display.get_board())
 king=King(3,3)
 king.render_king(display.get_board())
 
+total_max_barbarians=30
+barbarian_list=[] #(2,1) is p and (2,28) is q and (27,1)
+
+
 while True:
     
     #king.areal_damage(display.get_board(),cannon_list,hut_list,th)
@@ -402,6 +490,7 @@ while True:
     for i in range(0,int(king_ratio)):
         print("█",end="")
     print("\n")
+    print("Total Available Barbarians are {}".format(total_max_barbarians))
     if ch=='f':
         break
     if ch=='w':
@@ -416,6 +505,21 @@ while True:
         king.areal_damage(display.get_board(),cannon_list,hut_list,th)
     if ch==' ':
         king.deal_damage(display.get_board(),cannon_list,hut_list,th)
+    if ch=='p':
+        barb=Barbarians(2,1)
+        barb.render_barbarians(display.get_board())
+        barbarian_list.append(barb)
+        total_max_barbarians-=1
+    if ch=='q':
+        barb=Barbarians(2,28)
+        barb.render_barbarians(display.get_board())
+        barbarian_list.append(barb)
+        total_max_barbarians-=1
+    if ch=='r':
+        barb=Barbarians(27,1)
+        barb.render_barbarians(display.get_board())
+        barbarian_list.append(barb)
+        total_max_barbarians-=1
     for cannon in cannon_list:
         cannon.cannon_attack([],king,display.get_board())
     time.sleep(2)
