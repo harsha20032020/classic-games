@@ -123,17 +123,31 @@ class Cannon:
         return self.strength
     def damage_taken(self):
         self.strength-=1
-    # def cannon_color(self,grid):
-    #     x=self.x
-    #     y=self.y
-    #     w=len(self.get_shape())
-    #     for i in range(x,x+w):
-    #         grid[self.y][i]=self.strength # ill colorize based on the values in the grid.
-    #     return grid
+    
     
     # need to do barbarian and king interactions
+    def cannon_attack(self,barblist,king,grid):
+        #each cannon attacks the closest barbarian in barblist or if the king is closer than the barbarians, it attacks the king
+        #if there are no barbarians, it attacks the king
+        #if there are no barbarians and no king, it attacks nothing
+        minval=1000
+        minindex=0
+        for barbarian in barblist:
+            distance=math.sqrt((barbarian.get_x()-self.x)**2+(barbarian.get_y()-self.y)**2)
+            if distance<minval:
+                minval=distance
+                minindex=barblist.index(barbarian)
+        dist=math.sqrt((king.get_x()-self.x)**2 + (king.get_y()-self.y)**2)
+        #print("min barb distance is {} and distance of king is {}".format(minval, dist))
+        if(dist<minval and dist<=self.range):
+            king.damage_taken()
+            king.render_king(grid)
+            if king.get_strength()<=0:
+                king.delete_king(grid)
+            
         
-        
+            
+                
 class Huts:
     def __init__(self,x,y):
         self.x=x
@@ -230,7 +244,7 @@ class King:
         self.y=y
         self.width=2
         self.height=2
-        self.strength=8 #king takes 8 hits to get killed
+        self.strength=16 #king takes 8 hits to get killed
         self.damage=1   #barbarian king deals 2 damage
         
     def get_x(self):
@@ -241,12 +255,25 @@ class King:
         self.x=x
     def set_y(self,y):
         self.y=y
+    def get_strength(self):
+        if self.strength<=0:
+            return 0
+        else:
+            return self.strength
     def render_king(self,grid):
         x=self.x
         y=self.y
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
-                grid[i][j]="K"
+                x=self.x
+                y=self.y
+                ratio = self.strength/16
+                if ratio> 0.5:
+                    grid[i][j]=Fore.GREEN+"K"+Style.RESET_ALL
+                elif ratio> 0.25:
+                    grid[i][j]=Fore.YELLOW+"K"+Style.RESET_ALL
+                else:
+                    grid[i][j]=Fore.RED+"K"+Style.RESET_ALL
         return grid
     def delete_king(self,grid):
         x=self.x
@@ -369,7 +396,12 @@ while True:
     #king.areal_damage(display.get_board(),cannon_list,hut_list,th)
     #king.deal_damage(display.get_board(),cannon_list,hut_list,th)
     ch=input_to(Get())
-    print("character entered is {}".format(ch))
+    #print("Health of king is {}".format(king.get_strength()))
+    king_ratio=(king.get_strength()/16)*100
+    print("King Health Bar {}%".format(king_ratio))
+    for i in range(0,int(king_ratio)):
+        print("█",end="")
+    print("\n")
     if ch=='f':
         break
     if ch=='w':
@@ -384,6 +416,8 @@ while True:
         king.areal_damage(display.get_board(),cannon_list,hut_list,th)
     if ch==' ':
         king.deal_damage(display.get_board(),cannon_list,hut_list,th)
+    for cannon in cannon_list:
+        cannon.cannon_attack([],king,display.get_board())
     time.sleep(2)
     display.print_board()
 
