@@ -8,6 +8,8 @@ import tty
 import signal
 import math
 
+from sqlalchemy import false
+
 class Get:
     """Class to get input."""
 
@@ -46,6 +48,7 @@ def input_to(getch, timeout=1):
         return None
 
 blank_arr=[]   
+th_destroyed=False
 class Board:
     def __init__(self,rows,columns):
         self.rows=rows
@@ -83,7 +86,7 @@ class Cannon:
         self.y=y
         self.width=2
         self.height=2
-        self.strength=4 #king takes 4 hits to destroy cannon
+        self.strength=8 #king takes 4 hits to destroy cannon
         self.range=6 #cannon can shoot 6 spaces
         self.damage=1 #cannon deals 1 damage
         
@@ -103,7 +106,7 @@ class Cannon:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 #grid[i][j]="4"
-                ratio = self.strength/4
+                ratio = self.strength/8
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"C"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -144,6 +147,13 @@ class Cannon:
             king.render_king(grid)
             if king.get_strength()<=0:
                 king.delete_king(grid)
+        elif(minval<=self.range):
+            affected_barbarian=barblist[minindex]
+            affected_barbarian.damage_taken()
+            affected_barbarian.render_barbarians(grid)
+            if affected_barbarian.get_strength()<=0:
+                affected_barbarian.delete_barbarians(grid)
+                barblist.remove(affected_barbarian)
             
         
             
@@ -154,7 +164,7 @@ class Huts:
         self.y=y
         self.width=1
         self.height=1
-        self.strength=2 #king takes 4 hits to destroy cannon
+        self.strength=4 #king takes 4 hits to destroy cannon
         
     def get_x(self):
         return self.x
@@ -171,7 +181,7 @@ class Huts:
         y=self.y
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
-                ratio = self.strength/2
+                ratio = self.strength/4
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"H"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -198,7 +208,7 @@ class Townhall:
         self.y=y
         self.width=4
         self.height=3
-        self.strength=6 #king takes 6 hits to destroy th
+        self.strength=16 #king takes 6 hits to destroy th
         
     def get_x(self):
         return self.x
@@ -216,7 +226,7 @@ class Townhall:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 #grid[i][j]="4"
-                ratio = self.strength/6
+                ratio = self.strength/16
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"T"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -321,7 +331,7 @@ class King:
             if(cannon.get_x()==x and cannon.get_y()==y+2):
                 cannon.damage_taken()
                 cannon.render_cannon(grid)
-                if(cannon.get_strength()==0):
+                if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     list1.remove(cannon)
         for hut in list2:
@@ -329,14 +339,14 @@ class King:
                 hut.damage_taken()
                 #print("the strength of hut is {}".format(hut.get_strength()))
                 hut.render_hut(grid)
-                if(hut.get_strength()==0):
+                if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     list2.remove(hut)
         if(th.get_x()==x and th.get_y()==y+2):
             th.damage_taken()
             #print("the strength of th is {}".format(th.get_strength()))
             th.render_th(grid)
-            if(th.get_strength()==0):
+            if(th.get_strength()<=0):
                 th.destroy_th(grid)
     
     def areal_damage(self,grid,list1,list2,th):
@@ -348,7 +358,7 @@ class King:
                 cannon.damage_taken()
                 #print("the cannon at position {} {} has strength {}".format(cannon.get_x(),cannon.get_y(),cannon.get_strength()))
                 cannon.render_cannon(grid)
-                if(cannon.get_strength()==0):
+                if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     list1.remove(cannon)
         for hut in list2:
@@ -357,7 +367,7 @@ class King:
                 hut.damage_taken()
                 #print("the strength of hut is {}".format(hut.get_strength()))
                 hut.render_hut(grid)
-                if(hut.get_strength()==0):
+                if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     list2.remove(hut)
         dist=math.sqrt((th.get_x() - x)**2 + (th.get_y() - y)**2)
@@ -365,7 +375,7 @@ class King:
             th.damage_taken()
             #print("the strength of th is {}".format(th.get_strength()))
             th.render_th(grid)
-            if(th.get_strength()==0):
+            if(th.get_strength()<=0):
                 th.destroy_th(grid)
             
 class Barbarians:
@@ -448,6 +458,90 @@ class Barbarians:
         self.y=y
         self.x=x
         self.render_barbarians(grid)
+    def barbarian_motion(self,cannon_list,hut_list,th,grid):
+        x=self.x
+        y=self.y
+        # barbarian goes to the closest structure 
+        mindist=1000
+        entity="None"
+        t_index=0
+        for cannon in cannon_list:
+            if(math.sqrt((cannon.get_x()-x)**2 + (cannon.get_y()-y)**2))<mindist:
+                mindist=math.sqrt((cannon.get_x()-x)**2 +(cannon.get_y()-y)**2)
+                entity="cannon"
+                t_index=cannon_list.index(cannon)
+        for hut in hut_list:
+            if(math.sqrt((hut.get_x()-x)**2 +(hut.get_y()-y)**2))<mindist:
+                mindist=math.sqrt((hut.get_x()-x)**2 + (hut.get_y()-y)**2)
+                entity="hut"
+                t_index=hut_list.index(hut)
+        if(math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2))<mindist and th.get_strength()>0:
+            mindist=math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2)
+            entity="th"
+        #move in the direction of the entity
+        targetx=0
+        targety=0
+        if entity=="th":
+            targetx=th.get_x()
+            targety=th.get_y()
+        elif entity=="cannon":
+            targetx=cannon_list[t_index].get_x()
+            targety=cannon_list[t_index].get_y()
+        elif entity=="hut":
+            targetx=hut_list[t_index].get_x()
+            targety=hut_list[t_index].get_y()
+        # self.move_to(self.get_x(), self.get_y()+1,grid) works
+        flx=0
+        fly=0            
+        if(self.x>targetx-1) and (self.y==targety-1):
+            flx=-1
+        elif(self.x<targetx-1) and (self.y==targety-1):
+            flx=1
+        elif(self.x==targetx-1) and (self.y>targety-1):
+            fly=-1
+        elif(self.x==targetx-1) and (self.y<targety-1):
+            fly=1
+        elif(self.x>targetx-1) and (self.y>targety-1):
+            flx=-1   
+            fly=-1
+        elif(self.x<targetx-1) and (self.y<targety-1):
+            flx=1
+            fly=1
+        elif(self.x<targetx-1) and (self.y>targety-1):
+            flx=1
+            fly=-1
+        elif(self.x>targetx-1) and (self.y<targety-1):
+            flx=-1
+            fly=1
+        self.move_to(self.x+flx,self.y+fly,grid)
+        if (self.x==targetx-1) and (self.y==targety-1):
+            if entity == "hut":
+                hut=hut_list[t_index]
+                hut.damage_taken()
+                hut.render_hut(grid)
+                print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
+                if(hut.get_strength()<=0):
+                    hut.destroy_hut(grid)
+                    hut_list.remove(hut)
+            elif entity == "cannon":
+                cannon=cannon_list[t_index]
+                cannon.damage_taken()
+                cannon.render_cannon(grid)
+                print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
+                if(cannon.get_strength()<=0):
+                    cannon.destroy_cannon(grid)
+                    cannon_list.remove(cannon)
+            elif entity == "th":
+                th.damage_taken()
+                th.render_th(grid)
+                print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
+                if(th.get_strength()<=0):
+                    th.destroy_th(grid)
+                    th_destroyed=True
+            
+        
+            
+        
         
     # def deal_damage(self,grid,list1,list2,th):
     # todo
@@ -478,6 +572,31 @@ king.render_king(display.get_board())
 total_max_barbarians=30
 barbarian_list=[] #(2,1) is p and (2,28) is q and (27,1)
 
+def verify_win():
+    if len(hut_list)==0 and len(cannon_list)==0 and th.get_strength()<=0:
+        print ("""
+
+        ██╗░░░██╗░█████╗░██╗░░░██╗  ░██╗░░░░░░░██╗██╗███╗░░██╗
+        ╚██╗░██╔╝██╔══██╗██║░░░██║  ░██║░░██╗░░██║██║████╗░██║
+        ░╚████╔╝░██║░░██║██║░░░██║  ░╚██╗████╗██╔╝██║██╔██╗██║
+        ░░╚██╔╝░░██║░░██║██║░░░██║  ░░████╔═████║░██║██║╚████║
+        ░░░██║░░░╚█████╔╝╚██████╔╝  ░░╚██╔╝░╚██╔╝░██║██║░╚███║
+        ░░░╚═╝░░░░╚════╝░░╚═════╝░  ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚══╝
+        """)
+        return True
+    elif total_max_barbarians==0 and king.get_strength()<=0:
+        print ("""
+               
+        ██╗░░░██╗░█████╗░██╗░░░██╗  ██╗░░░░░░█████╗░░██████╗███████╗
+        ╚██╗░██╔╝██╔══██╗██║░░░██║  ██║░░░░░██╔══██╗██╔════╝██╔════╝
+        ░╚████╔╝░██║░░██║██║░░░██║  ██║░░░░░██║░░██║╚█████╗░█████╗░░
+        ░░╚██╔╝░░██║░░██║██║░░░██║  ██║░░░░░██║░░██║░╚═══██╗██╔══╝░░
+        ░░░██║░░░╚█████╔╝╚██████╔╝  ███████╗╚█████╔╝██████╔╝███████╗
+        ░░░╚═╝░░░░╚════╝░░╚═════╝░  ╚══════╝░╚════╝░╚═════╝░╚══════╝
+        """)
+        return True
+    else:
+        return False
 
 while True:
     
@@ -521,8 +640,12 @@ while True:
         barbarian_list.append(barb)
         total_max_barbarians-=1
     for cannon in cannon_list:
-        cannon.cannon_attack([],king,display.get_board())
-    time.sleep(2)
+        cannon.cannon_attack(barbarian_list,king,display.get_board())
+    for barbarian in barbarian_list:
+        barbarian.barbarian_motion(cannon_list,hut_list,th,display.get_board())
+    time.sleep(1)
     display.print_board()
+    if(verify_win()==True):
+        break
 
 
