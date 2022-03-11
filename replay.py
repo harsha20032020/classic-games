@@ -598,15 +598,26 @@ def verify_win():
         return True
     else:
         return False
-
-starttime=time.time()
-characters_list=[]
+ 
+my_file = open("list.txt", "r")
+content = my_file.read()
+character_list=[]
 timestamp_list=[]
+# 1st word of each line to be inserted to character_list and the 2nd word of each line to be inserted to timestamp_list
+for line in content.splitlines():
+    character_list.append(line.split()[0])
+    timestamp_list.append(line.split()[1])
+ctr=0
 while True:
     
     #king.areal_damage(display.get_board(),cannon_list,hut_list,th)
     #king.deal_damage(display.get_board(),cannon_list,hut_list,th)
-    ch=input_to(Get())
+    ch=character_list[ctr]
+    if ctr==0:
+        time.sleep(float(timestamp_list[ctr]))
+    else:
+        time.sleep(float(timestamp_list[ctr])-float(timestamp_list[ctr-1]))
+    ctr+=1
     #print("Health of king is {}".format(king.get_strength()))
     king_ratio=(king.get_strength()/16)*100
     print("King Health Bar {}%".format(king_ratio))
@@ -647,15 +658,8 @@ while True:
         cannon.cannon_attack(barbarian_list,king,display.get_board())
     for barbarian in barbarian_list:
         barbarian.barbarian_motion(cannon_list,hut_list,th,display.get_board())
-    if ch!="None":
-        characters_list.append(ch)
-        timestamp_list.append(time.time()-starttime)
-    time.sleep(1)
     display.print_board()
     if(verify_win()==True):
         break
 
-file = open("list.txt", "w")
-for index in range(len(characters_list)):
-    file.write(str(characters_list[index]) + " " + str(timestamp_list[index]) + "\n")
-file.close()
+
