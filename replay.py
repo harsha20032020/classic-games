@@ -520,7 +520,7 @@ class Barbarians:
                 hut=hut_list[t_index]
                 hut.damage_taken()
                 hut.render_hut(grid)
-                print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
+                #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
                 if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     hut_list.remove(hut)
@@ -528,14 +528,14 @@ class Barbarians:
                 cannon=cannon_list[t_index]
                 cannon.damage_taken()
                 cannon.render_cannon(grid)
-                print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
+                #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     cannon_list.remove(cannon)
             elif entity == "th":
                 th.damage_taken()
                 th.render_th(grid)
-                print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
+                #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
                 if(th.get_strength()<=0):
                     th.destroy_th(grid)
                     th_destroyed=True
@@ -605,8 +605,12 @@ character_list=[]
 timestamp_list=[]
 # 1st word of each line to be inserted to character_list and the 2nd word of each line to be inserted to timestamp_list
 for line in content.splitlines():
-    character_list.append(line.split()[0])
-    timestamp_list.append(line.split()[1])
+    if len(line.split())==1:
+        character_list.append(" ")
+        timestamp_list.append(line.split()[0])
+    else:
+        character_list.append(line.split()[0])
+        timestamp_list.append(line.split()[1])
 ctr=0
 while True:
     

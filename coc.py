@@ -520,7 +520,7 @@ class Barbarians:
                 hut=hut_list[t_index]
                 hut.damage_taken()
                 hut.render_hut(grid)
-                print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
+                #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
                 if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     hut_list.remove(hut)
@@ -528,14 +528,14 @@ class Barbarians:
                 cannon=cannon_list[t_index]
                 cannon.damage_taken()
                 cannon.render_cannon(grid)
-                print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
+                #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     cannon_list.remove(cannon)
             elif entity == "th":
                 th.damage_taken()
                 th.render_th(grid)
-                print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
+                #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
                 if(th.get_strength()<=0):
                     th.destroy_th(grid)
                     th_destroyed=True
@@ -647,10 +647,10 @@ while True:
         cannon.cannon_attack(barbarian_list,king,display.get_board())
     for barbarian in barbarian_list:
         barbarian.barbarian_motion(cannon_list,hut_list,th,display.get_board())
-    if ch!="None":
-        characters_list.append(ch)
-        timestamp_list.append(time.time()-starttime)
-    time.sleep(1)
+    
+    characters_list.append(ch)
+    timestamp_list.append(time.time()-starttime)
+    #time.sleep(1)
     display.print_board()
     if(verify_win()==True):
         break
