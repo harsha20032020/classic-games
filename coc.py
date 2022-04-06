@@ -88,6 +88,7 @@ class Cannon:
         self.width=2
         self.height=2
         self.strength=8 #king takes 4 hits to destroy cannon
+        self.max_health=8
         self.range=6 #cannon can shoot 6 spaces
         self.damage=1 #cannon deals 1 damage
         
@@ -107,7 +108,7 @@ class Cannon:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 #grid[i][j]="4"
-                ratio = self.strength/8
+                ratio = self.strength/self.max_health
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"C"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -125,8 +126,8 @@ class Cannon:
         del self
     def get_strength(self):
         return self.strength
-    def damage_taken(self):
-        self.strength-=1
+    def damage_taken(self,damage):
+        self.strength-=damage
     
     
     # need to do barbarian and king interactions
@@ -144,13 +145,13 @@ class Cannon:
         dist=math.sqrt((king.get_x()-self.x)**2 + (king.get_y()-self.y)**2)
         #print("min barb distance is {} and distance of king is {}".format(minval, dist))
         if(dist<minval and dist<=self.range):
-            king.damage_taken()
+            king.damage_taken(self.damage)
             king.render_king(grid)
             if king.get_strength()<=0:
                 king.delete_king(grid)
         elif(minval<=self.range):
             affected_barbarian=barblist[minindex]
-            affected_barbarian.damage_taken()
+            affected_barbarian.damage_taken(self.damage)
             affected_barbarian.render_barbarians(grid)
             if affected_barbarian.get_strength()<=0:
                 affected_barbarian.delete_barbarians(grid)
@@ -166,6 +167,7 @@ class Huts:
         self.width=1
         self.height=1
         self.strength=4 #king takes 4 hits to destroy cannon
+        self.max_health=4
         
     def get_x(self):
         return self.x
@@ -182,7 +184,7 @@ class Huts:
         y=self.y
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
-                ratio = self.strength/4
+                ratio = self.strength/self.max_health
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"H"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -200,8 +202,8 @@ class Huts:
         del self
     def get_strength(self):
         return self.strength
-    def damage_taken(self):
-        self.strength-=1
+    def damage_taken(self,damage):
+        self.strength-=damage
 
 class Townhall:
     def __init__(self,x,y):
@@ -210,6 +212,7 @@ class Townhall:
         self.width=4
         self.height=3
         self.strength=16 #king takes 6 hits to destroy th
+        self.max_strength=16
         
     def get_x(self):
         return self.x
@@ -227,7 +230,7 @@ class Townhall:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 #grid[i][j]="4"
-                ratio = self.strength/16
+                ratio = self.strength/self.max_strength
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"T"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -245,8 +248,8 @@ class Townhall:
         del self
     def get_strength(self):
         return self.strength
-    def damage_taken(self):
-        self.strength-=1
+    def damage_taken(self,damage):
+        self.strength-=damage
 
 
 class King:
@@ -256,6 +259,7 @@ class King:
         self.width=2
         self.height=2
         self.strength=16 #king takes 8 hits to get killed
+        self.max_strength=16
         self.damage=1   #barbarian king deals 2 damage
         
     def get_x(self):
@@ -278,7 +282,7 @@ class King:
             for j in range(y,y+self.height):
                 x=self.x
                 y=self.y
-                ratio = self.strength/16
+                ratio = self.strength/self.max_strength
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"K"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -299,8 +303,8 @@ class King:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 grid[i][j]=" "
-    def damage_taken(self):
-        self.strength-=1
+    def damage_taken(self,damage):
+        self.strength-=damage
     def move_up(self,grid):
         x=self.x
         self.clear_king(grid)
@@ -330,21 +334,21 @@ class King:
         y=self.y
         for cannon in list1:
             if(cannon.get_x()==x and cannon.get_y()==y+2):
-                cannon.damage_taken()
+                cannon.damage_taken(self.damage)
                 cannon.render_cannon(grid)
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     list1.remove(cannon)
         for hut in list2:
             if(hut.get_x()==x and hut.get_y()==y+2):
-                hut.damage_taken()
+                hut.damage_taken(self.damage)
                 #print("the strength of hut is {}".format(hut.get_strength()))
                 hut.render_hut(grid)
                 if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     list2.remove(hut)
         if(th.get_x()==x and th.get_y()==y+2):
-            th.damage_taken()
+            th.damage_taken(self.damage)
             #print("the strength of th is {}".format(th.get_strength()))
             th.render_th(grid)
             if(th.get_strength()<=0):
@@ -356,7 +360,7 @@ class King:
         for cannon in list1:
             dist=math.sqrt((cannon.get_x() - x)**2 + (cannon.get_y() - y)**2)
             if(dist<=5):
-                cannon.damage_taken()
+                cannon.damage_taken(self.damage)
                 #print("the cannon at position {} {} has strength {}".format(cannon.get_x(),cannon.get_y(),cannon.get_strength()))
                 cannon.render_cannon(grid)
                 if(cannon.get_strength()<=0):
@@ -365,7 +369,7 @@ class King:
         for hut in list2:
             dist=math.sqrt((hut.get_x() - x)**2 + (hut.get_y() - y)**2)
             if(dist<=5):
-                hut.damage_taken()
+                hut.damage_taken(self.damage)
                 #print("the strength of hut is {}".format(hut.get_strength()))
                 hut.render_hut(grid)
                 if(hut.get_strength()<=0):
@@ -373,7 +377,7 @@ class King:
                     list2.remove(hut)
         dist=math.sqrt((th.get_x() - x)**2 + (th.get_y() - y)**2)
         if(dist<=5):
-            th.damage_taken()
+            th.damage_taken(self.damage)
             #print("the strength of th is {}".format(th.get_strength()))
             th.render_th(grid)
             if(th.get_strength()<=0):
@@ -387,6 +391,7 @@ class Barbarians:
         self.height=1
         self.strength=4 #kbarbarians takes 4 hits to get killed
         self.damage=1   #barbarian king deals 1 damage
+        self.max_strength=4
         
     def get_x(self):
         return self.x
@@ -408,7 +413,7 @@ class Barbarians:
             for j in range(y,y+self.height):
                 x=self.x
                 y=self.y
-                ratio = self.strength/4
+                ratio = self.strength/self.max_strength
                 if ratio> 0.5:
                     grid[i][j]=Fore.GREEN+"B"+Style.RESET_ALL
                 elif ratio> 0.25:
@@ -429,8 +434,8 @@ class Barbarians:
         for i in range(x,x+self.width):
             for j in range(y,y+self.height):
                 grid[i][j]=" "
-    def damage_taken(self):
-        self.strength-=1
+    def damage_taken(self,damage):
+        self.strength-=damage
     # def move_up(self,grid):
     #     x=self.x
     #     self.clear_barbarians(grid)
@@ -518,7 +523,7 @@ class Barbarians:
         if (self.x==targetx-1) and (self.y==targety-1):
             if entity == "hut":
                 hut=hut_list[t_index]
-                hut.damage_taken()
+                hut.damage_taken(self.damage)
                 hut.render_hut(grid)
                 #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
                 if(hut.get_strength()<=0):
@@ -526,14 +531,14 @@ class Barbarians:
                     hut_list.remove(hut)
             elif entity == "cannon":
                 cannon=cannon_list[t_index]
-                cannon.damage_taken()
+                cannon.damage_taken(self.damage)
                 cannon.render_cannon(grid)
                 #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     cannon_list.remove(cannon)
             elif entity == "th":
-                th.damage_taken()
+                th.damage_taken(self.damage)
                 th.render_th(grid)
                 #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
                 if(th.get_strength()<=0):
