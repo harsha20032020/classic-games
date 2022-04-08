@@ -84,9 +84,9 @@ for hut in hut_list:
 if level=='1':
     cannon_list=[Cannon(10,53),Cannon(20,53)]
 elif level=='2':
-    cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,30)]
+    cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,40)]
 elif level=='3':
-    cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,30),Cannon(15,70)]
+    cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,40),Cannon(15,70)]
 #rendering cannons
 for cannon in cannon_list:
     cannon.render_cannon(display.get_board())   
@@ -95,7 +95,10 @@ for cannon in cannon_list:
 #wizard towers rendering 
 if level=='1':
     wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60)]
-
+elif level=='2':
+    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30)]
+elif level=='3':
+    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30),Wizard_tower(15,75)]
 for wizard in wizard_list:
     wizard.render_wizard_tower(display.get_board())
 
@@ -208,6 +211,7 @@ while True:
         wizard.wizard_tower_attack(barbarian_list,[],king,display.get_board())
     for barbarian in barbarian_list:
         barbarian.barbarian_motion(cannon_list,hut_list,wizard_list,th,display.get_board())
+        print("The barbarian has health: {}".format(barbarian.get_strength())) 
         #barbarian.barbarian_motion(cannon_list,hut_list,th,display.get_board())
     for archer in archer_list:
         archer.archer_motion(cannon_list,hut_list,th,display.get_board())

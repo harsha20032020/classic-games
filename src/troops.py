@@ -162,7 +162,7 @@ class Barbarians:
                 hut.damage_taken(self.damage)
                 hut.render_hut(grid)
                 
-                print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
+                #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
                 time.sleep(1)
                 if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
@@ -171,7 +171,7 @@ class Barbarians:
                 cannon=cannon_list[t_index]
                 cannon.damage_taken(self.damage)
                 cannon.render_cannon(grid)
-                print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
+                #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
                 time.sleep(1)
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
@@ -179,7 +179,7 @@ class Barbarians:
             elif entity == "th":
                 th.damage_taken(self.damage)
                 th.render_th(grid)
-                print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
+                #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
                 time.sleep(1)
                 if(th.get_strength()<=0):
                     th.destroy_th(grid)
@@ -188,7 +188,7 @@ class Barbarians:
                 wizard=wizard_list[t_index]
                 wizard.damage_taken(self.damage)
                 wizard.render_wizard_tower(grid)
-                print("Barbarians strength is {} and wizard is {}".format(self.strength, wizard.strength))
+                #print("Barbarians strength is {} and wizard is {}".format(self.strength, wizard.strength))
                 time.sleep(1)
                 if(wizard.get_strength()<=0):
                     wizard.destroy_wizard_tower(grid)

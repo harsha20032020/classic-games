@@ -19,7 +19,7 @@ class Cannon:
         self.height=2
         self.strength=8 #king takes 4 hits to destroy cannon
         self.max_health=8
-        self.range=2 #cannon can shoot 6 spaces
+        self.range=4 #cannon can shoot 6 spaces
         self.damage=1 #cannon deals 1 damage
         
     def get_x(self):
@@ -96,7 +96,7 @@ class Wizard_tower:
         self.height=2
         self.strength=8 #king takes 4 hits to destroy Wizard_tower
         self.max_health=8
-        self.range=2 #Wizard_tower can shoot 6 spaces
+        self.range=4 #Wizard_tower can shoot 6 spaces
         self.damage=1 #Wizard_tower deals 1 damage
         
     def get_x(self):
