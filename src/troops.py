@@ -163,7 +163,7 @@ class Barbarians:
                 hut.render_hut(grid)
                 
                 #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
-                time.sleep(1)
+                #time.sleep(1)
                 if(hut.get_strength()<=0):
                     hut.destroy_hut(grid)
                     hut_list.remove(hut)
@@ -172,7 +172,7 @@ class Barbarians:
                 cannon.damage_taken(self.damage)
                 cannon.render_cannon(grid)
                 #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
-                time.sleep(1)
+                #time.sleep(1)
                 if(cannon.get_strength()<=0):
                     cannon.destroy_cannon(grid)
                     cannon_list.remove(cannon)
@@ -180,7 +180,7 @@ class Barbarians:
                 th.damage_taken(self.damage)
                 th.render_th(grid)
                 #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
-                time.sleep(1)
+                #time.sleep(1)
                 if(th.get_strength()<=0):
                     th.destroy_th(grid)
                     th_destroyed=True
@@ -189,7 +189,7 @@ class Barbarians:
                 wizard.damage_taken(self.damage)
                 wizard.render_wizard_tower(grid)
                 #print("Barbarians strength is {} and wizard is {}".format(self.strength, wizard.strength))
-                time.sleep(1)
+                #time.sleep(1)
                 if(wizard.get_strength()<=0):
                     wizard.destroy_wizard_tower(grid)
                     wizard_list.remove(wizard)
@@ -209,9 +209,10 @@ class Archers:
         self.width=1
         self.height=1
         self.strength=2 #kArchers takes 2 hits to get killed
-        self.damage=0.5   #Archer king deals 0.5 damage
+        self.damage=0.25   #Archer king deals 0.5 damage
         self.max_strength=2
         self.range=3
+        self.attack_range=5
         
     def get_x(self):
         return self.x
@@ -261,7 +262,7 @@ class Archers:
         self.y=y
         self.x=x
         self.render_archers(grid)
-    def archer_motion(self,cannon_list,hut_list,th,grid):
+    def archer_motion(self,cannon_list,wizard_towers_list,hut_list,th,grid):
         x=self.x
         y=self.y
         # archer goes to the closest structure 
@@ -278,6 +279,11 @@ class Archers:
                 mindist=math.sqrt((hut.get_x()-x)**2 + (hut.get_y()-y)**2)
                 entity="hut"
                 t_index=hut_list.index(hut)
+        for wizard in wizard_towers_list:
+            if(math.sqrt((wizard.get_x()-x)**2 +(wizard.get_y()-y)**2))<mindist:
+                mindist=math.sqrt((wizard.get_x()-x)**2 + (wizard.get_y()-y)**2)
+                entity="wizard"
+                t_index=wizard_towers_list.index(wizard)
         if(math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2))<mindist and th.get_strength()>0:
             mindist=math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2)
             entity="th"
@@ -293,6 +299,9 @@ class Archers:
         elif entity=="hut":
             targetx=hut_list[t_index].get_x()
             targety=hut_list[t_index].get_y()
+        elif entity=="wizard":
+            targetx=wizard_towers_list[t_index].get_x()
+            targety=wizard_towers_list[t_index].get_y()
         # self.move_to(self.get_x(), self.get_y()+1,grid) works
         flx=0
         fly=0            
@@ -317,7 +326,9 @@ class Archers:
             flx=-1
             fly=1
         self.move_to(self.x+flx,self.y+fly,grid)
-        if (self.x-targetx<=self.range) and (self.y-targety<=self.range):
+        td=math.sqrt((self.x-targetx)**2 + (self.y-targety)**2)
+        print("distance {}".format(td))
+        if (td<=self.attack_range):
             if entity == "hut":
                 hut=hut_list[t_index]
                 hut.damage_taken(self.damage)
@@ -341,4 +352,174 @@ class Archers:
                 if(th.get_strength()<=0):
                     th.destroy_th(grid)
                     th_destroyed=True
-          
+            elif entity == "wizard":
+                wizard=wizard_towers_list[t_index]
+                wizard.damage_taken(self.damage)
+                wizard.render_wizard_tower(grid)
+                #print("archers strength is {} and wizard is {}".format(self.strength, wizard.strength))
+                if(wizard.get_strength()<=0):
+                    wizard.destroy_wizard_tower(grid)
+                    wizard_towers_list.remove(wizard)
+                    
+                    
+class Baloons:
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
+        self.width=1
+        self.height=1
+        self.strength=2 #kbaloons takes 2 hits to get killed
+        self.damage=1   #Archer king deals 0.5 damage
+        self.max_strength=2
+        self.range=1
+        self.attack_range=5
+        
+    def get_x(self):
+        return self.x
+    def get_y(self):
+        return self.y
+    def set_x(self,x):
+        self.x=x
+    def set_y(self,y):
+        self.y=y
+    def get_strength(self):
+        if self.strength<=0:
+            return 0
+        else:
+            return self.strength
+    def render_baloons(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                x=self.x
+                y=self.y
+                ratio = self.strength/self.max_strength
+                if ratio> 0.5:
+                    grid[i][j]=Fore.GREEN+"L"+Style.RESET_ALL
+                elif ratio> 0.25:
+                    grid[i][j]=Fore.YELLOW+"L"+Style.RESET_ALL
+                else:
+                    grid[i][j]=Fore.RED+"L"+Style.RESET_ALL
+        return grid
+    def delete_baloons(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                grid[i][j]=" "
+        del self
+    def clear_baloons(self,grid):
+        x=self.x
+        y=self.y
+        for i in range(x,x+self.width):
+            for j in range(y,y+self.height):
+                grid[i][j]=" "
+    def damage_taken(self,damage):
+        self.strength-=damage
+    def move_to(self,x,y,grid):
+        self.clear_baloons(grid)
+        self.y=y
+        self.x=x
+        self.render_baloons(grid)
+    def baloon_motion(self,cannon_list,wizard_towers_list,hut_list,th,grid):
+        x=self.x
+        y=self.y
+        mindist=1000
+        mindistnew=1000
+        entity="None"
+        t_index=0
+        for cannon in cannon_list:
+            if(math.sqrt((cannon.get_x()-x)**2 + (cannon.get_y()-y)**2))<mindist:
+                mindist=math.sqrt((cannon.get_x()-x)**2 +(cannon.get_y()-y)**2)
+                entity="cannon"
+                t_index=cannon_list.index(cannon)
+        for wizard in wizard_towers_list:
+            if(math.sqrt((wizard.get_x()-x)**2 +(wizard.get_y()-y)**2))<mindist:
+                mindist=math.sqrt((wizard.get_x()-x)**2 + (wizard.get_y()-y)**2)
+                entity="wizard"
+                t_index=wizard_towers_list.index(wizard)
+        if(bool(cannon_list)==False and bool(wizard_towers_list)==False):
+            for hut in hut_list:
+                if(math.sqrt((hut.get_x()-x)**2 +(hut.get_y()-y)**2))<mindistnew:
+                    mindistnew=math.sqrt((hut.get_x()-x)**2 + (hut.get_y()-y)**2)
+                    entity="hut"
+                    t_index=hut_list.index(hut)
+            if(math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2))<mindistnew and th.get_strength()>0:
+                mindistnew=math.sqrt((th.get_x()-x)**2 + (th.get_y()-y)**2)
+                entity="th"
+        targetx=0
+        targety=0
+        if entity=="th":
+            targetx=th.get_x()
+            targety=th.get_y()
+        elif entity=="cannon":
+            targetx=cannon_list[t_index].get_x()
+            targety=cannon_list[t_index].get_y()
+        elif entity=="hut":
+            targetx=hut_list[t_index].get_x()
+            targety=hut_list[t_index].get_y()
+        elif entity=="wizard":
+            targetx=wizard_towers_list[t_index].get_x()
+            targety=wizard_towers_list[t_index].get_y()
+        flx=0
+        fly=0            
+        if(self.x>targetx-1) and (self.y==targety-1):
+            flx=-1
+        elif(self.x<targetx-1) and (self.y==targety-1):
+            flx=1
+        elif(self.x==targetx-1) and (self.y>targety-1):
+            fly=-1
+        elif(self.x==targetx-1) and (self.y<targety-1):
+            fly=1
+        elif(self.x>targetx-1) and (self.y>targety-1):
+            flx=-1   
+            fly=-1
+        elif(self.x<targetx-1) and (self.y<targety-1):
+            flx=1
+            fly=1
+        elif(self.x<targetx-1) and (self.y>targety-1):
+            flx=1
+            fly=-1
+        elif(self.x>targetx-1) and (self.y<targety-1):
+            flx=-1
+            fly=1
+        self.move_to(self.x+flx,self.y+fly,grid)
+        if (self.x==targetx-1) and (self.y==targety-1):
+            if entity == "hut":
+                hut=hut_list[t_index]
+                hut.damage_taken(self.damage)
+                hut.render_hut(grid)
+                
+                #print("Barbarians strength is {} and huts is {}".format(self.strength, hut.strength))
+                #time.sleep(1)
+                if(hut.get_strength()<=0):
+                    hut.destroy_hut(grid)
+                    hut_list.remove(hut)
+            elif entity == "cannon":
+                cannon=cannon_list[t_index]
+                cannon.damage_taken(self.damage)
+                cannon.render_cannon(grid)
+                #print("Barbarians strength is {} and cannon is {}".format(self.strength, cannon.strength))
+                #time.sleep(1)
+                if(cannon.get_strength()<=0):
+                    cannon.destroy_cannon(grid)
+                    cannon_list.remove(cannon)
+            elif entity == "th":
+                th.damage_taken(self.damage)
+                th.render_th(grid)
+                #print("Barbarians strength is {} and th is {}".format(self.strength, th.strength))
+                #time.sleep(1)
+                if(th.get_strength()<=0):
+                    th.destroy_th(grid)
+                    th_destroyed=True
+            elif entity == "wizard":
+                wizard=wizard_towers_list[t_index]
+                wizard.damage_taken(self.damage)
+                wizard.render_wizard_tower(grid)
+                #print("Barbarians strength is {} and wizard is {}".format(self.strength, wizard.strength))
+                #time.sleep(1)
+                if(wizard.get_strength()<=0):
+                    wizard.destroy_wizard_tower(grid)
+                    wizard_towers_list.remove(wizard)
+        

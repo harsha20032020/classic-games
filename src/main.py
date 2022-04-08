@@ -12,7 +12,7 @@ import time
 from sqlalchemy import false
 
 from buildings import Cannon,Huts,Wizard_tower,Townhall
-from troops import Barbarians,Archers
+from troops import Barbarians,Archers,Baloons
 from heroes import Board,King
 class Get:
     """Class to get input."""
@@ -83,22 +83,26 @@ for hut in hut_list:
 #     cannon.render_cannon(display.get_board())
 if level=='1':
     cannon_list=[Cannon(10,53),Cannon(20,53)]
+    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60)]
+    total_max_barbarians=6
+    total_max_archers=6
+    total_max_baloons=6
 elif level=='2':
     cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,40)]
+    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30)]
+    total_max_barbarians=8
+    total_max_archers=8
+    total_max_baloons=8
 elif level=='3':
     cannon_list=[Cannon(10,53),Cannon(20,53),Cannon(15,40),Cannon(15,70)]
+    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30),Wizard_tower(15,75)]
+    total_max_barbarians=10
+    total_max_archers=10
+    total_max_baloons=10
 #rendering cannons
 for cannon in cannon_list:
     cannon.render_cannon(display.get_board())   
-    
- 
 #wizard towers rendering 
-if level=='1':
-    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60)]
-elif level=='2':
-    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30)]
-elif level=='3':
-    wizard_list=[Wizard_tower(15,45),Wizard_tower(15,60),Wizard_tower(15,30),Wizard_tower(15,75)]
 for wizard in wizard_list:
     wizard.render_wizard_tower(display.get_board())
 
@@ -114,10 +118,9 @@ if hero=='k':
     king=King(3,3)
     king.render_king(display.get_board())
 
-total_max_barbarians=30
 barbarian_list=[] #(2,1) is p and (2,28) is q and (27,1)
-total_max_archers=6
 archer_list=[]
+baloons_list=[]
 
 def verify_win():
     if len(hut_list)==0 and len(cannon_list)==0 and th.get_strength()<=0:
@@ -205,18 +208,35 @@ while True:
         arch.render_archers(display.get_board())
         archer_list.append(arch)
         total_max_archers-=1
+    if ch=='z':
+        baloon=Baloons(2,1)
+        baloon.render_baloons(display.get_board())
+        baloons_list.append(baloon)
+        total_max_baloons-=1
+    if ch=='x':
+        baloon=Baloons(2,height-2)
+        baloon.render_baloons(display.get_board())
+        baloons_list.append(baloon)
+        total_max_baloons-=1
+    if ch=='c':
+        baloon=Baloons(width-3,1)
+        baloon.render_baloons(display.get_board())
+        baloons_list.append(baloon)
+        total_max_baloons-=1
     for cannon in cannon_list:
         cannon.cannon_attack(barbarian_list,king,display.get_board())
     for wizard in wizard_list:
         wizard.wizard_tower_attack(barbarian_list,[],king,display.get_board())
     for barbarian in barbarian_list:
         barbarian.barbarian_motion(cannon_list,hut_list,wizard_list,th,display.get_board())
-        print("The barbarian has health: {}".format(barbarian.get_strength())) 
+        #print("The barbarian has health: {}".format(barbarian.get_strength())) 
         #barbarian.barbarian_motion(cannon_list,hut_list,th,display.get_board())
     for archer in archer_list:
-        archer.archer_motion(cannon_list,hut_list,th,display.get_board())
-        archer.archer_motion(cannon_list,hut_list,th,display.get_board())
-    
+        archer.archer_motion(cannon_list,wizard_list,hut_list,th,display.get_board())
+        archer.archer_motion(cannon_list,wizard_list,hut_list,th,display.get_board())
+    for baloon in baloons_list:
+        baloon.baloon_motion(cannon_list,wizard_list,hut_list,th,display.get_board())
+        baloon.baloon_motion(cannon_list,wizard_list,hut_list,th,display.get_board())
     characters_list.append(ch)
     timestamp_list.append(time.time()-starttime)
     #time.sleep(1)
