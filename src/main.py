@@ -164,6 +164,7 @@ while True:
     print("\n")
     print("Total Available Barbarians are {}".format(total_max_barbarians))
     print("Total Available Archers are {}".format(total_max_archers))
+    print("Total Available Baloons are {}".format(total_max_baloons))
     if ch=='f':
         break
     if ch=='w':
@@ -226,7 +227,7 @@ while True:
     for cannon in cannon_list:
         cannon.cannon_attack(barbarian_list,king,display.get_board())
     for wizard in wizard_list:
-        wizard.wizard_tower_attack(barbarian_list,[],king,display.get_board())
+        wizard.wizard_tower_attack(barbarian_list,baloons_list,king,display.get_board())
     for barbarian in barbarian_list:
         barbarian.barbarian_motion(cannon_list,hut_list,wizard_list,th,display.get_board())
         #print("The barbarian has health: {}".format(barbarian.get_strength())) 

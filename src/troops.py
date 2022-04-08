@@ -368,7 +368,7 @@ class Baloons:
         self.y=y
         self.width=1
         self.height=1
-        self.strength=2 #kbaloons takes 2 hits to get killed
+        self.strength=4 #kbaloons takes 2 hits to get killed
         self.damage=1   #Archer king deals 0.5 damage
         self.max_strength=2
         self.range=1
@@ -402,7 +402,7 @@ class Baloons:
                 else:
                     grid[i][j]=Fore.RED+"L"+Style.RESET_ALL
         return grid
-    def delete_baloons(self,grid):
+    def delete_baloon(self,grid):
         x=self.x
         y=self.y
         for i in range(x,x+self.width):
